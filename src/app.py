@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_file
+from flask import Flask, render_template, send_file, request
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')  # Use the 'Agg' backend, which is suited for non-interactive environments
@@ -27,7 +27,7 @@ def generate_map():
     #create an empty array that will store the map data
     map_data = np.zeros((height, width))
 
-    sea_level = 0.15 #create the sea level threshold
+    sea_level = float(request.args.get('seaLevel', '0.15')) #create the sea level threshold from user input, deafault is 0.15
     coastline= 0.05 #controls the ruggedness/smoothness of the coast
 
     #fill in the map with perlin noise
