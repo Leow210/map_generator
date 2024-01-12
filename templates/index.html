@@ -5,10 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+
+    <style>
+        #infoPanel {
+            background-color: white;
+            position: absolute;
+            border: 1px solid black;
+            padding: 5px;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Fictional Map Generator</h1>
+    <h1>Leo's Map Generator</h1>
     <p>Adjust settings, and generate your very own map!</p>
 
     <!--sea level slider to allow user to adjust sea level-->
@@ -23,7 +32,8 @@
     <br>
 
     <!--url_for sets src of img to root that generates map-->
-    <img id="mapImage" src="" alt="Generated Map">
+    <img id="mapImage" src="" alt="Generated Map" onmousemove="showInfo(event)">
+    <div id="infoPanel"></div>
 
 
     <script>
@@ -41,6 +51,37 @@
                 })
                 .catch(error => console.error('Error fetching the map: ', error));
         }
+
+        //user hovers over map to get info for current position
+        function showInfo(e) {
+            var img = document.getElementById("mapImage")
+
+            //get the cursors position relative to the map
+            var rect = img.getBoundingClientRect();
+
+
+            var xScale = img.naturalWidth / img.clientWidth;
+            var yScale = img.naturalHeight / img.clientHeight;
+
+            var x = Math.round((e.clientX - rect.left) * xScale);
+            var y = Math.round((e.clientY - rect.top) * yScale);
+
+            fetch(`/get_location_data?x=${x}&y=${y}`)
+                .then(response => response.json())
+                .then(data => {
+                    var infoPanel = document.getElementById("infoPanel")
+                    infoPanel.innerHTML = `Temperature: ${data.temp}<br>Moisture: ${data.moist}<br>Biome: ${data.biome}<br>Elevation: ${data.elevation}`
+                    infoPanel.style.top = (e.clientY + 10) + "px";
+                    infoPanel.style.left = (e.clientX + 10) + "px";
+                    infoPanel.style.display = "block";
+                })
+                .catch(error => console.error('Error fetching the data: ', error));
+        }
+
+        //hide the info panel when user is not hovering over the image
+        document.getElementById("mapImage").onmouseleave = function () {
+            document.getElementById("infoPanel").style.display = "none";
+        };
 
     </script>
 </body>
